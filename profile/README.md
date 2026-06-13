@@ -48,7 +48,6 @@ Two **solutions** sit on three shared **agents**:
 | [**cli**](https://github.com/janusperf/cli) | The Janus CLI solution: running tests from the terminal and wiring them into CI/CD pipelines. |
 | [**domain**](https://github.com/janusperf/domain) | The shared rules and vocabulary (metrics, thresholds, scoring) that every part of Janus agrees on. |
 | [**landing**](https://github.com/janusperf/landing) | The public marketing site. |
-| [**.github**](https://github.com/janusperf/.github) | This repo: the organization profile and shared automation across the other repos. |
 
 ## Running it
 
