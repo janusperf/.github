@@ -1,0 +1,31 @@
+name: Studio example
+on:
+  workflow_dispatch:
+    inputs:
+      ai_goal:
+        description: "Optional AI-driven goal."
+        required: false
+      flow_suite:
+        description: "Path to a YAML suite file."
+        required: false
+      min_score:
+        description: "Minimum UX score gate."
+        required: false
+        default: "70"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Studio
+        uses: ./.github/actions/studio
+        with:
+          project_id: ${{ vars.RUN_PROJECT_ID }}
+          device_id: ${{ vars.RUN_DEVICE_ID }}
+          api_base_url: ${{ vars.RUN_API_BASE_URL }}
+          oauth_session_json: ${{ secrets.OAUTH_SESSION_JSON }}
+          ai_goal: ${{ inputs.ai_goal }}
+          flow_suite: ${{ inputs.flow_suite }}
+          min_score: ${{ inputs.min_score }}
+          parallel: "3"

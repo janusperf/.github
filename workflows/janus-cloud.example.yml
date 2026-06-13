@@ -1,0 +1,22 @@
+name: Janus UX gate (cloud)
+
+on:
+  pull_request:
+
+jobs:
+  janus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build your app and produce the binary referenced by `app.file` in
+      # janus.cloud.yml (e.g. app-release.apk for Android, MyApp.ipa for iOS).
+      # - run: ./gradlew assembleRelease
+
+      - name: Janus cloud run
+        uses: ./.github/actions/janus-cloud-run
+        with:
+          config: janus.cloud.yml
+          token: ${{ secrets.JANUS_TOKEN }}
+          workspace: ${{ vars.JANUS_WORKSPACE_ID }}
+          cli-spec: ${{ vars.JANUS_CLI_SPEC }}

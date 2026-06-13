@@ -1,0 +1,105 @@
+name: Desktop release
+
+on:
+  push:
+    tags:
+      - "desktop-v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-14, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Lint & typecheck
+        working-directory: desktop
+        run: npm run lint
+
+      - name: Unit tests
+        working-directory: desktop
+        run: npm test
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Freeze agent (macOS)
+        if: matrix.platform == 'macos-14'
+        shell: bash
+        run: |
+          python -m venv agent/.venv
+          agent/.venv/bin/pip install -r agent/requirements.txt -r agent/requirements-dev.txt
+          ( cd agent && PYTHON=.venv/bin/python ./freeze.sh )
+          mkdir -p desktop/resources/agent/darwin-arm64
+          unzip -o agent/dist/agent-*.zip -d desktop/resources/agent/darwin-arm64
+
+      - name: Freeze agent (Windows)
+        if: matrix.platform == 'windows-latest'
+        shell: bash
+        run: |
+          python -m venv agent/.venv
+          agent/.venv/Scripts/pip install -r agent/requirements.txt -r agent/requirements-dev.txt
+          ( cd agent && PYTHON=.venv/Scripts/python.exe ./freeze.sh )
+          mkdir -p desktop/resources/agent/win32-x64
+          unzip -o agent/dist/agent-*.zip -d desktop/resources/agent/win32-x64
+
+      - name: Build & package (macOS)
+        if: matrix.platform == 'macos-14'
+        working-directory: desktop
+        run: npm run electron:build:mac -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build & package (Windows)
+        if: matrix.platform == 'windows-latest'
+        working-directory: desktop
+        run: npm run electron:build:win -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+
+      - name: Resolve version
+        id: version
+        working-directory: desktop
+        shell: bash
+        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to update bucket
+        working-directory: desktop
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.UPDATES_BUCKET_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.UPDATES_BUCKET_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.UPDATES_BUCKET_REGION }}
+          BUCKET: ${{ secrets.UPDATES_BUCKET_NAME }}
+          ENDPOINT: ${{ secrets.UPDATES_BUCKET_ENDPOINT }}
+        run: |
+          aws s3 sync "release/${{ steps.version.outputs.value }}/" "s3://${BUCKET}/desktop/" \
+            --endpoint-url "${ENDPOINT}" \
+            --exclude "*" \
+            --include "*.dmg" --include "*.zip" --include "*.exe" \
+            --include "*.blockmap" --include "*.yml" \
+            --acl public-read

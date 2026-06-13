@@ -1,0 +1,46 @@
+name: "Janus cloud run"
+description: "Run a Janus performance test on a cloud device (AWS Device Farm) and gate the pipeline on the result."
+inputs:
+  config:
+    description: "Path to janus.cloud.yml."
+    required: false
+    default: "janus.cloud.yml"
+  token:
+    description: "Studio service/API token, sent as JANUS_SERVICE_TOKEN. Use a workspace API token in CI."
+    required: true
+  workspace:
+    description: "Target Studio workspace id. Falls back to the workspace declared in the config."
+    required: false
+    default: ""
+  cloud-url:
+    description: "Studio API base URL (JANUS_STUDIO_API_URL). Defaults to the public Studio API."
+    required: false
+    default: ""
+  cli-spec:
+    description: "How to install the janus CLI: an npm package spec, a tarball URL, or a local path passed to `npm install -g`."
+    required: true
+  node-version:
+    description: "Node.js version to set up on the runner."
+    required: false
+    default: "20"
+  json:
+    description: "Emit machine-readable JSON output instead of human-readable lines."
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+    - name: Install Janus CLI
+      shell: bash
+      run: npm install -g "${{ inputs.cli-spec }}"
+    - name: Run cloud test
+      shell: bash
+      env:
+        JANUS_SERVICE_TOKEN: ${{ inputs.token }}
+        JANUS_WORKSPACE_ID: ${{ inputs.workspace }}
+        JANUS_STUDIO_API_URL: ${{ inputs.cloud-url }}
+      run: janus ${{ inputs.json == 'true' && '--json ' || '' }}cloud run --config "${{ inputs.config }}"

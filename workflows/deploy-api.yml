@@ -1,0 +1,54 @@
+name: Deploy API
+
+# Manual deploy trigger. Wire this to your cluster credentials in
+# Settings → Secrets and environments. The job is intentionally a stub
+# — fill in the cluster-specific `kubectl apply` / `argocd app sync`
+# command for your environment.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options: [staging, production]
+      image_tag:
+        description: "Image tag to deploy (e.g. sha-abc1234 or v1.2.3)"
+        required: true
+
+concurrency:
+  # Only one deploy per environment at a time.
+  group: deploy-api-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve manifest with the requested tag
+        run: |
+          sed -i \
+            "s,ghcr.io/REPLACE_ME/studio-api:SHA,ghcr.io/${{ github.repository_owner }}/studio-api:${{ inputs.image_tag }},g" \
+            deploy/k8s/api-deployment.yaml deploy/k8s/api-migrate-job.yaml
+
+      # === Cluster-specific step goes here =================================
+      # Examples:
+      #   - aws eks update-kubeconfig --name studio-prod
+      #   - gcloud container clusters get-credentials studio-prod \
+      #         --region us-central1 --project my-project
+      #   - argocd app sync studio-api --revision ${{ inputs.image_tag }}
+      #
+      # Then apply the migration Job, wait for completion, then roll
+      # out the new Deployment. The intentional gap is so this file
+      # ships with no embedded credentials. Replace the block below
+      # with the real commands once cluster auth is configured.
+      # =====================================================================
+      - name: Placeholder deploy
+        run: |
+          echo "Would deploy image_tag=${{ inputs.image_tag }} to ${{ inputs.environment }}"
+          echo "Replace this step with the real kubectl / argocd / helm commands."
+          cat deploy/k8s/api-deployment.yaml | head -30
