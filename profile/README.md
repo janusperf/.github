@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="apptim-header.svg" alt="Apptim" width="640" />
+</p>
+
 # Apptim
 
 **Catch performance and UX regressions in your mobile app before users feel them.**
