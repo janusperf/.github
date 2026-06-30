@@ -44,12 +44,13 @@ Two **solutions** sit on three shared **agents**:
 
 | Repo | What it handles |
 | ---- | --------------- |
-| [**agent**](https://github.com/janusperf/agent) | The engine that runs on the test machine: captures device metrics, runs the AI actions, and bridges everything to the cloud. |
-| [**studio**](https://github.com/janusperf/studio) | The cloud and its web app, where runs, reports, projects, teams and billing live. |
-| [**desktop**](https://github.com/janusperf/desktop) | The Desktop solution: the app teams use to run tests by hand on devices they have connected. |
-| [**cli**](https://github.com/janusperf/cli) | The Apptim CLI solution: running tests from the terminal and wiring them into CI/CD pipelines. |
-| [**domain**](https://github.com/janusperf/domain) | The shared rules and vocabulary (metrics, thresholds, scoring) that every part of Apptim agrees on. |
-| [**landing**](https://github.com/janusperf/landing) | The public marketing site. |
+| [**domain**](https://github.com/janusperf/domain) | Shared domain models, metric catalog, and threshold definitions used across agents and Studio API. |
+| [**agent**](https://github.com/janusperf/agent) | Multi-agent engine on the test machine (Profiler, Intelligence, Studio): capture, AI actions, and cloud bridge. |
+| [**studio**](https://github.com/janusperf/studio) | The cloud and Studio Web: runs, Perceived UX Scores, Intelligent Reports, workspaces, billing, and alerts. |
+| [**desktop**](https://github.com/janusperf/desktop) | Desktop solution for Manual, Script, and AI-Driven tests on connected Android and iOS devices. |
+| [**cli**](https://github.com/janusperf/cli) | Apptim CLI: React Ink TUI for local runs and headless CI/CD pipeline integration. |
+| [**docs**](https://github.com/janusperf/docs) | Product documentation site: Desktop, CLI, pipeline integration, Studio, metrics reference, and plans. |
+| [**landing**](https://github.com/janusperf/landing) | Public marketing site. |
 
 ## Running it
 
