@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="apptim-header.webp" alt="Apptim" width="640" />
+  <img src="apptim-header.webp" alt="Apptim" />
 </p>
 
 # Apptim
