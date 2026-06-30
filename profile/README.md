@@ -2,8 +2,6 @@
   <img src="apptim-header.webp" alt="Apptim" />
 </p>
 
-# Apptim
-
 **Catch performance and UX regressions in your mobile app before users feel them.**
 
 Apptim helps developers, QA engineers, and product teams find performance and UX problems in their Android and iOS apps. Instead of a single session average, it pinpoints exactly *when* and *where* the experience degrades, and tracks whether each release gets better or worse.
